@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">PopularMovieApp</string>
+    <string name="error_message">Ooops... Cannot retrieve movies</string>
+    <string name="title">Title</string>
+    <string name="rating">0.0</string>
+    <string name="release">00–00-0000</string>
+    <string name="overview">Overview</string>
+    <string name="release_date">Release Date:</string>
+    <string name="action_popular">Most Popular</string>
+    <string name="action_toprated">Top Rated</string>
+    <string name="content_poster">Movie Poster</string>
+    <string name="ratings">Ratings:</string>
+</resources>

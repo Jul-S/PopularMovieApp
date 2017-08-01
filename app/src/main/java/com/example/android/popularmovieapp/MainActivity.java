@@ -3,10 +3,9 @@ package com.example.android.popularmovieapp;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,12 +13,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.example.android.popularmovieapp.utilities.JSONParserUtils;
-import com.example.android.popularmovieapp.utilities.NetworkUtils;
-
-import java.net.URL;
 
 public class MainActivity extends AppCompatActivity implements MoviesRecyclerViewAdapter.MoviesOnClickHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -29,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements MoviesRecyclerVie
     private RecyclerView.LayoutManager mLayoutManager;
     private String sorting;
     private TextView mErrorMessageDisplay;
+    private ProgressBar mLoadingIndicator;
 
     // for managing RecyclerView state;
     private Parcelable mListState;
@@ -43,15 +39,15 @@ public class MainActivity extends AppCompatActivity implements MoviesRecyclerVie
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null) {
-            sorting = savedInstanceState.getString("sort");
-            mListState = savedInstanceState.getParcelable("state");
-            mLayoutManager.onRestoreInstanceState(mListState);
-        }
         setContentView(R.layout.activity_main);
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_movies);
+        mMoviesAdapter = new MoviesRecyclerViewAdapter(this);
 
-        // changing number of coloms in horizontal orientation
+        mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+
+        mRecyclerView.setAdapter(mMoviesAdapter);
+        // setting different LayoutManager for horizontal/vertical orientation
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             mLayoutManager = new GridLayoutManager(this, 2);
             mRecyclerView.setLayoutManager(mLayoutManager);
@@ -59,13 +55,7 @@ public class MainActivity extends AppCompatActivity implements MoviesRecyclerVie
             mLayoutManager = new GridLayoutManager(this, 4);
             mRecyclerView.setLayoutManager(mLayoutManager);
         }
-
-        mMoviesAdapter = new MoviesRecyclerViewAdapter(this);
-
-        mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
-        mRecyclerView.setAdapter(mMoviesAdapter);
-
-        // Hadling Pagination
+        // Handling Pagination
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -88,9 +78,10 @@ public class MainActivity extends AppCompatActivity implements MoviesRecyclerVie
             }
         });
 
-
-        if (sorting == null) sorting = "popular";
-        loadMovieData(sorting, currentPage);
+        if (savedInstanceState == null) {
+            if (sorting == null) sorting = "popular";
+            loadMovieData(sorting, currentPage);
+        }
 
     }
 
@@ -100,12 +91,15 @@ public class MainActivity extends AppCompatActivity implements MoviesRecyclerVie
             currentPage += 1;
             Log.d(TAG, "Loading more pages " + currentPage);
             loadMovieData(sorting, currentPage);
-        } else isLastPage = true;
+        } else {
+            isLastPage = true;
+        }
     }
 
     private void loadMovieData(String sorting, int pageNum) {
         Log.d(TAG, "Loading pages " + pageNum);
-        new FetchMoviesTask().execute(sorting, String.valueOf(pageNum));
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+        new FetchMoviesTask(this, new FetchMovieTaskCompleteListener()).execute(sorting, String.valueOf(pageNum));
     }
 
     @Override
@@ -117,45 +111,6 @@ public class MainActivity extends AppCompatActivity implements MoviesRecyclerVie
         bundle.putSerializable("value", movieData);
         intentToStartDetailActivity.putExtras(bundle);
         startActivity(intentToStartDetailActivity);
-    }
-
-    private class FetchMoviesTask extends AsyncTask<String, Void, MovieData[]> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected MovieData[] doInBackground(String... strings) {
-            if (strings.length < 2) return null;
-            String sort = strings[0];
-            String page = strings[1];
-            URL moviesRequestUrl = NetworkUtils.buildUrl(sort, page);
-
-            try {
-                String jsonMovieResponse = NetworkUtils
-                        .getResponseFromHttpUrl(moviesRequestUrl);
-                totalPages = JSONParserUtils.getTotalPages(jsonMovieResponse);
-
-                return JSONParserUtils
-                        .getMoviesFromJson(jsonMovieResponse);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(MovieData[] movieData) {
-            if (movieData != null) {
-                isLoading = false;
-                showMovieDataView();
-                mMoviesAdapter.addMovieData(movieData);
-            } else {
-                showErrorMessage();
-            }
-        }
     }
 
     private void showErrorMessage() {
@@ -203,19 +158,32 @@ public class MainActivity extends AppCompatActivity implements MoviesRecyclerVie
     public void onSaveInstanceState(Bundle savedInstanceState) {
         Log.d(TAG, "onSaveInstance");
         mListState = mLayoutManager.onSaveInstanceState();
-        savedInstanceState.putString("sort", sorting);
-        savedInstanceState.putParcelable("state", mListState);
+        Bundle bundle = new Bundle();
+        bundle.putString("sort", sorting);
+        bundle.putInt("total_pages", totalPages);
+        bundle.putInt("curr_page", currentPage);
+        bundle.putParcelable("state", mListState);
+        bundle.putSerializable("data", mMoviesAdapter.getMovieData());
+
+        savedInstanceState.putBundle("state_bundle", bundle);
 
         super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.d(TAG, "onRestoreInstance");
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            sorting = savedInstanceState.getString("sort");
-            mListState = savedInstanceState.getParcelable("state");
+        if ((savedInstanceState != null) &&
+                (savedInstanceState.getBundle("state_bundle") != null) &&
+                savedInstanceState.getBundle("state_bundle").getSerializable("data") != null) {
+            Bundle bundle = savedInstanceState.getBundle("state_bundle");
+            sorting = bundle.getString("sort");
+            totalPages = bundle.getInt("total_pages");
+            currentPage = bundle.getInt("curr_page");
+            mListState = bundle.getParcelable("state");
+            MovieData[] data = (MovieData[]) bundle.getSerializable("data");
+            mMoviesAdapter.resetMovieData();
+            mMoviesAdapter.addMovieData(data);
         }
     }
 
@@ -252,5 +220,20 @@ public class MainActivity extends AppCompatActivity implements MoviesRecyclerVie
         Log.d(TAG, "onDestroy");
         super.onDestroy();
 
+    }
+
+    public class FetchMovieTaskCompleteListener implements AsyncTaskCompleteListener<MovieData> {
+        @Override
+        public void onTaskComplete(MovieData[] movieData, int pages) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            if (movieData != null) {
+                isLoading = false;
+                totalPages = pages;
+                showMovieDataView();
+                mMoviesAdapter.addMovieData(movieData);
+            } else {
+                showErrorMessage();
+            }
+        }
     }
 }

@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
 import com.squareup.picasso.Picasso;
 
@@ -30,8 +29,8 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
         mMoviesData = null;
     }
 
-    public interface MoviesOnClickHandler {
-        void onClick(MovieData movieData);
+    public MovieData[] getMovieData() {
+        return mMoviesData;
     }
 
     public void addMovieData(MovieData[] moviesData) {
@@ -54,19 +53,16 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
         return new MovieViewHolder(view);
     }
 
-
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
         if (null != mMoviesData) {
             MovieData curMovieData = mMoviesData[position];
             Context context = holder.mPosterImageView.getContext();
-            holder.mLoadingIndicator.setVisibility(View.INVISIBLE);
+
             Picasso.with(context)
                     .load(curMovieData.getImageUrl().toString())
                     .centerCrop().fit()
                     .into(holder.mPosterImageView);
-        } else {
-            holder.mLoadingIndicator.setVisibility(View.VISIBLE);
         }
     }
 
@@ -76,14 +72,16 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
         return mMoviesData.length;
     }
 
+    public interface MoviesOnClickHandler {
+        void onClick(MovieData movieData);
+    }
+
     public class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final ImageView mPosterImageView;
-        private final ProgressBar mLoadingIndicator;
 
         public MovieViewHolder(View itemView) {
             super(itemView);
             mPosterImageView = itemView.findViewById(R.id.iv_movie_poster);
-            mLoadingIndicator = itemView.findViewById(R.id.pb_loading_indicator);
             itemView.setOnClickListener(this);
         }
 

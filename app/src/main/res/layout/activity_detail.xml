@@ -1,108 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
     tools:context="com.example.android.popularmovieapp.DetailActivity">
-
-    <ImageView
-        android:contentDescription="@string/content_poster"
-        android:id="@+id/iv_movie_poster"
-        android:layout_width="185dp"
-        android:layout_height="277dp"
-        android:layout_gravity="center"
-        android:padding="4dp"
-        android:src="@mipmap/ic_launcher" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tv_title"
-            style="@style/HeaderTextStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/title" />
+        <ImageView
+            android:id="@+id/iv_movie_poster"
+            android:layout_width="185dp"
+            android:layout_height="277dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/content_poster"
+            android:padding="4dp"
+            android:src="@mipmap/ic_launcher" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tv_title"
+                style="@style/HeaderTextStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingRight="12dp"
-                android:paddingEnd="12dp">
-
-                <TextView
-                    style="@style/DescTextStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/release_date" />
-
-                <TextView
-                    android:id="@+id/tv_release"
-                    style="@style/HeaderTextStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/release" />
-            </LinearLayout>
+                android:text="@string/title" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/DescTextStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ratings" />
+                android:orientation="horizontal">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:contentDescription="@string/rating"
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_gravity="top"
-                        android:paddingRight="4dp"
-                        android:paddingEnd="4dp"
-                        android:paddingTop="4dp"
-                        android:src="@drawable/star" />
+                    android:orientation="vertical"
+                    android:paddingEnd="12dp"
+                    android:paddingRight="12dp">
 
                     <TextView
-                        android:id="@+id/tv_rating"
-                        style="@style/HeaderTextStyle"
+                        style="@style/DescTextStyle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="@string/rating" />
+                        android:text="@string/release_date" />
+
+                    <TextView
+                        android:id="@+id/tv_release"
+                        style="@style/HeaderTextStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/release" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/DescTextStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ratings" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="top"
+                            android:contentDescription="@string/rating"
+                            android:paddingEnd="4dp"
+                            android:paddingRight="4dp"
+                            android:paddingTop="4dp"
+                            android:src="@drawable/star" />
+
+                        <TextView
+                            android:id="@+id/tv_rating"
+                            style="@style/HeaderTextStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:text="@string/rating" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
+
+            <TextView
+                style="@style/DescTextStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/overview" />
+
+            <TextView
+                android:id="@+id/tv_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/overview"
+                android:textSize="16sp" />
+
         </LinearLayout>
-
-        <TextView
-            style="@style/DescTextStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/overview" />
-
-        <TextView
-            android:id="@+id/tv_desc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/overview"
-            android:textSize="16sp" />
-
     </LinearLayout>
-</LinearLayout>
+</ScrollView>

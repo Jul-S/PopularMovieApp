@@ -5,20 +5,12 @@
     android:orientation="vertical">
 
     <ImageView
-        android:contentDescription="@string/content_poster"
         android:id="@+id/iv_movie_poster"
         android:layout_width="185dp"
         android:layout_height="277dp"
         android:layout_gravity="center"
         android:layout_margin="4dp"
+        android:contentDescription="@string/content_poster"
         android:src="@mipmap/ic_launcher"/>
-
-    <ProgressBar
-        android:id="@+id/pb_loading_indicator"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_gravity="center"
-        android:paddingTop="90dp"
-        android:visibility="invisible" />
 
 </FrameLayout>
